@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
   imports: [CommonModule, FormsModule],
   template: `
   <div class="container">
-    <h1>Login</h1>
+    <h1>JWT Auth Login</h1>
     <form (ngSubmit)="submit()">
       <label>Username
         <input [(ngModel)]="username" name="username" required />

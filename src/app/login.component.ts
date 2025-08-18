@@ -4,14 +4,11 @@ import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html'  // ✅ correct
+  template: `<button type="button" (click)="signIn()">Sign in with Microsoft</button>`
 })
 export class LoginComponent {
   constructor(private msal: MsalService) {}
-
   signIn() {
-    this.msal.loginRedirect({
-      scopes: [environment.auth.apiScope] // e.g. api://<API_APP_ID>/access_as_user
-    });
+    this.msal.loginRedirect({ scopes: [environment.auth.apiScope] });
   }
 }

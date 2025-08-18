@@ -8,6 +8,7 @@ on:
     branches: [ main ]
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -31,16 +32,25 @@ jobs:
           npm run build -- --configuration production
           test -d dist/jwt-ng || (echo "::error::dist/jwt-ng not found" && exit 1)
 
+      - name: Get Id Token
+        id: idtoken
+        uses: actions/github-script@v7
+        with:
+          script: |
+            return await core.getIDToken()
+          result-encoding: string
+
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: upload
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          github_id_token: ${{ steps.idtoken.outputs.result }}
           production_branch: main
           app_location: "/"
           output_location: "dist/jwt-ng"
           api_location: ""
           skip_api_build: true
+
 
 
 # name: Deploy Angular to Azure Static Web Apps

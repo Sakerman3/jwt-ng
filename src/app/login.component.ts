@@ -4,7 +4,7 @@ import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.ts'
 })
 export class LoginComponent {
   constructor(private msal: MsalService) {}

@@ -10,12 +10,13 @@ import { environment } from '../environments/environment';
   imports: [CommonModule, FormsModule],
   template: `
   <div class="container">
-    <h1><center>JWT Auth Login</center></h1>
+    <h1>JWT Auth Login</h1>
     <button type="button" (click)="signIn()">Sign in with Microsoft</button>
   </div>
   `,
   styles: [`
     .container { max-width: 360px; margin: 10vh auto; display: grid; gap: 12px; }
+    h1 { font-size: 24px; font-weight: bold; text-align: center; }
     label { display: grid; gap: 4px; }
     input { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
     button { padding: 10px 12px; border-radius: 8px; border: none; cursor: pointer; }

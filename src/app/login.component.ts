@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MsalService } from '@azure/msal-angular';
@@ -10,7 +10,7 @@ import { environment } from '../environments/environment';
   imports: [CommonModule, FormsModule],
   template: `
   <div class="container">
-    <h1>JWT Auth Login</h1>
+    <h1><center>JWT Auth Login</center></h1>
     <button type="button" (click)="signIn()">Sign in with Microsoft</button>
   </div>
   `,

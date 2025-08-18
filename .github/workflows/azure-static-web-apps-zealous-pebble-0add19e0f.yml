@@ -51,7 +51,8 @@ jobs:
           result-encoding: string
 
       - name: Debug id-token presence
-        run: echo "Got GitHub OIDC ID token: ${{ steps.idtoken.outputs.hasToken }}"
+        run: |
+          echo "Got GitHub OIDC ID token: ${{ steps.idtoken.outputs.hasToken }}"
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1

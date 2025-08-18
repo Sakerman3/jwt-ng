@@ -32,6 +32,39 @@ jobs:
           npm run build -- --configuration production
           test -d dist/jwt-ng || (echo "::error::dist/jwt-ng not found" && exit 1)
 
+      # --- DEBUG: show repo context and that the runner can request an OIDC token
+      - name: Debug repo context
+        run: |
+          echo "Repo:    $GITHUB_REPOSITORY"
+          echo "Branch:  $GITHUB_REF_NAME"
+          echo "Event:   $GITHUB_EVENT_NAME"
+          echo "OIDC URL present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}${ACTIONS_ID_TOKEN_REQUEST_URL:+" (env set)"}"
+
+      - name: Get Id Token
+        id: idtoken
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setOutput('hasToken', token && token.length > 0 ? 'yes' : 'no');
+            return token;
+          result-encoding: string
+
+      - name: Debug id-token presence
+        run: echo "Got GitHub OIDC ID token: ${{ steps.idtoken.outputs.hasToken }}"
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: upload
+          github_id_token: ${{ steps.idtoken.outputs.result }}
+          production_branch: main
+          app_location: "/"                 # change to "jwt-ng" if the app is in a subfolder
+          output_location: "dist/jwt-ng"    # or "jwt-ng/dist/jwt-ng"
+          api_location: ""                  # no Functions API here
+          skip_api_build: true
+
+
 
 
 # name: Deploy Angular to Azure Static Web Apps

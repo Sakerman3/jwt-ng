@@ -48,7 +48,7 @@ jobs:
 
           # IMPORTANT: upload the built artifacts; do not trigger an Oryx rebuild
           skip_app_build: true
-          app_artifact_location: "dist/jwt-ng"
+          app_artifact_location: "dist/jwt-ng/browser"
 
           # No Functions API in this repo
           api_location: ""

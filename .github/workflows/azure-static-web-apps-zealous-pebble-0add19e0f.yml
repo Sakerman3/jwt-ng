@@ -8,7 +8,6 @@ on:
     branches: [ main ]
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -31,38 +30,25 @@ jobs:
           npm ci
           npm run build -- --configuration production
           test -d dist/jwt-ng || (echo "::error::dist/jwt-ng not found" && exit 1)
+          test -f dist/jwt-ng/index.html || (echo "::error::dist/jwt-ng/index.html missing; build didn’t produce an index.html" && exit 1)
 
       - name: Debug repo context
         run: |
           echo "Repo:    $GITHUB_REPOSITORY"
           echo "Branch:  $GITHUB_REF_NAME"
           echo "Event:   $GITHUB_EVENT_NAME"
-          echo "OIDC URL present: ${ACTIONS_ID_TOKEN_REQUEST_URL:+yes}${ACTIONS_ID_TOKEN_REQUEST_URL:+" (env set)"}"
-
-      - name: Get Id Token
-        id: idtoken
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken();
-            core.setOutput('hasToken', token && token.length > 0 ? 'yes' : 'no');
-            return token;
-          result-encoding: string
-
-      - name: Debug id-token presence
-        run: |
-          echo "Got GitHub OIDC ID token: ${{ steps.idtoken.outputs.hasToken }}"
-
 
       - name: Azure Static Web Apps Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: upload
-          github_id_token: ${{ steps.idtoken.outputs.result }}
+          # Using Deployment Token mode — ensure SWA policy is set to "Deployment token"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           production_branch: main
-          deployment_environment: Production
-          app_location: "/"
-          output_location: "dist/jwt-ng"
+
+          # IMPORTANT: upload the built artifacts; do not trigger an Oryx rebuild
+          skip_app_build: true
+          app_artifact_location: "dist/jwt-ng"
+
+          # No Functions API in this repo
           api_location: ""
-          skip_api_build: true

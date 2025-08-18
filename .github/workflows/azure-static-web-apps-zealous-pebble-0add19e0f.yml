@@ -32,7 +32,7 @@ jobs:
           npm run build -- --configuration production
           test -d dist/jwt-ng || (echo "::error::dist/jwt-ng not found" && exit 1)
 
-      # --- DEBUG: show repo context and that the runner can request an OIDC token
+      # --- DEBUG: show repo context and that the runner can request an OIDC token 
       - name: Debug repo context
         run: |
           echo "Repo:    $GITHUB_REPOSITORY"

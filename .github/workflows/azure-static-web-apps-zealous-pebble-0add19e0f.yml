@@ -53,7 +53,9 @@ jobs:
         run: |
           echo "Got GitHub OIDC ID token: ${{ steps.idtoken.outputs.hasToken }}"
 
-
+      - name: Copy SWA config to artifact
+        run: cp staticwebapp.config.json dist/jwt-ng/
+      
       - name: Azure Static Web Apps Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:

@@ -31,6 +31,7 @@ export class LoginComponent {
   async signIn() {
     try {
       await this.msal.initialize(); // belt-and-suspenders
+      await this.msal.instance.loginPopup({ scopes: [environment.auth.apiScope] });
       await this.msal.instance.loginRedirect({
         scopes: [environment.auth.apiScope],
         // remember where to come back to after sign-in

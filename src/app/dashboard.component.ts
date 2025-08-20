@@ -16,13 +16,6 @@ import { environment } from '../environments/environment';
         <div class="spacer"></div>
         <button (click)="logout()">Logout</button>
       </header>
-
-      <section>
-        <p>Welcome, {{ displayName }}!</p>
-        <button (click)="callApi()">Call protected API</button>
-        <pre *ngIf="apiResult">{{ apiResult | json }}</pre>
-        <p *ngIf="error" style="color:#b00020">{{ error }}</p>
-      </section>
     </div>
   `,
   styles: [`

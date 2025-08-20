@@ -17,9 +17,9 @@ import { environment } from '../environments/environment';
 
       <hr />
 
-      <h3>Pre-login API check</h3>
-      <p>This call is expected to fail (unauthenticated).</p>
-      <button type="button" (click)="testApi()">Test API (should fail)</button>
+      <h3>API test</h3>
+      <p>This call hits <code>/api/secret</code> and is expected to fail while not signed in.</p>
+      <button type="button" (click)="apiTest()">API test</button>
       <p class="result" *ngIf="apiMessage">{{ apiMessage }}</p>
     </div>
   `,
@@ -44,17 +44,11 @@ export class LoginComponent {
 
     try {
       await this.msal.initialize(); // ensure MSAL is ready
-
-      // Try POPUP first
       const result = await this.msal.instance.loginPopup({ scopes });
       if (result?.account) this.msal.instance.setActiveAccount(result.account);
-
-      // Navigate after successful popup sign-in
       await this.router.navigateByUrl('/dashboard');
     } catch (err) {
-      console.warn('Popup login failed or was blocked, falling back to redirect.', err);
-
-      // Fall back to REDIRECT
+      console.warn('Popup login failed, falling back to redirect.', err);
       await this.msal.instance.loginRedirect({
         scopes,
         redirectStartPage: '/dashboard',
@@ -62,19 +56,20 @@ export class LoginComponent {
     }
   }
 
-  testApi() {
+  apiTest() {
     this.apiMessage = '';
-    const url = new URL('/api/account', ensureTrailingSlash(environment.apiUrl)).toString();
+    const url = new URL('/api/secret', ensureTrailingSlash(environment.apiUrl)).toString();
 
     this.http.get(url).subscribe({
       next: (r) => {
-        // If this unexpectedly succeeds, show it
+        // If it somehow succeeds, report that too
         this.apiMessage = `Unexpected success calling ${url}: ${JSON.stringify(r)}`;
       },
       error: (err) => {
         const status = err?.status ?? 'unknown';
         const detail = err?.error?.error || err?.message || 'No error body';
         this.apiMessage = `Expected failure calling ${url} — status: ${status}; detail: ${detail}`;
+        console.error('API error', err);
       }
     });
   }

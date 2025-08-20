@@ -45,6 +45,7 @@ export class DashboardComponent implements OnInit {
   error = '';
 
   ngOnInit(): void {
+    // Client-side (ID token) default so the page shows something instantly
     let account = this.msal.instance.getActiveAccount();
     if (!account) {
       account = this.msal.instance.getAllAccounts()[0];
@@ -57,11 +58,23 @@ export class DashboardComponent implements OnInit {
     this.error = '';
     this.apiResult = undefined;
 
+    // Calls your backend; MsalInterceptor attaches the Bearer token for environment.apiUrl/*
     const url = new URL('/api/account', ensureTrailingSlash(environment.apiUrl)).toString();
-    console.log('API test ->', url);
 
-    this.http.get(url).subscribe({
-      next: (r) => (this.apiResult = r),
+    this.http.get<any>(url).subscribe({
+      next: (r) => {
+        this.apiResult = r;
+
+        // If your API returns identity info, prefer it over the client token’s value
+        // Common claim keys coming back from backend: name, preferred_username, upn, unique_name
+        const serverName =
+          r?.name ||
+          r?.preferred_username ||
+          r?.upn ||
+          r?.unique_name;
+
+        if (serverName) this.displayName = serverName;
+      },
       error: (err) => {
         const status = err?.status ?? 'unknown';
         const detail = err?.error?.error || err?.message || 'No error body';
@@ -72,7 +85,9 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void {
-    this.msal.instance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
+    this.msal.instance.logoutRedirect({
+      postLogoutRedirectUri: window.location.origin
+    });
   }
 }
 

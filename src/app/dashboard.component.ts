@@ -1,9 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
-import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,9 +18,9 @@ import { environment } from '../environments/environment';
       <section>
         <p>Welcome, {{ displayName }}!</p>
 
-        <h3>Account info from API</h3>
+        <h3>Account info (same source as name)</h3>
         <button (click)="apiTest()">API test</button>
-        <pre *ngIf="apiResult">{{ apiResult | json }}</pre>
+        <pre *ngIf="apiResult">{{ apiResult }}</pre>
         <p *ngIf="error" style="color:#b00020">{{ error }}</p>
       </section>
     </div>
@@ -32,20 +30,18 @@ import { environment } from '../environments/environment';
     header { display: flex; align-items: center; gap: 12px; }
     .spacer { flex: 1 }
     button { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; background: #f7f7f7; cursor: pointer; }
-    pre { background: #111; color: #eee; padding: 12px; border-radius: 8px; }
+    pre { background:#111;color:#eee;padding:12px;border-radius:8px;white-space:pre-wrap;word-break:break-word; }
   `]
 })
 export class DashboardComponent implements OnInit {
-  private http = inject(HttpClient);
   private msal = inject(MsalService);
   private router = inject(Router);
 
   displayName = '';
-  apiResult: any;
+  apiResult = '';
   error = '';
 
   ngOnInit(): void {
-    // Client-side (ID token) default so the page shows something instantly
     let account = this.msal.instance.getActiveAccount();
     if (!account) {
       account = this.msal.instance.getAllAccounts()[0];
@@ -56,41 +52,32 @@ export class DashboardComponent implements OnInit {
 
   apiTest(): void {
     this.error = '';
-    this.apiResult = undefined;
+    const acct = this.msal.instance.getActiveAccount()
+             ?? this.msal.instance.getAllAccounts()[0];
 
-    // Calls your backend; MsalInterceptor attaches the Bearer token for environment.apiUrl/*
-    const url = new URL('/api/account', ensureTrailingSlash(environment.apiUrl)).toString();
+    if (!acct) {
+      this.apiResult = '';
+      this.error = 'No active account in MSAL cache.';
+      return;
+    }
 
-    this.http.get<any>(url).subscribe({
-      next: (r) => {
-        this.apiResult = r;
+    // Show the same data source used for the greeting
+    const summary = {
+      source: 'msal-account-cache',
+      name: acct.name,
+      username: acct.username,
+      tenantId: acct.tenantId,
+      homeAccountId: acct.homeAccountId,
+      localAccountId: acct.localAccountId
+    };
 
-        // If your API returns identity info, prefer it over the client token’s value
-        // Common claim keys coming back from backend: name, preferred_username, upn, unique_name
-        const serverName =
-          r?.name ||
-          r?.preferred_username ||
-          r?.upn ||
-          r?.unique_name;
+    // Optionally tighten the greeting to match server-ish preferred field
+    this.displayName = summary.name || summary.username || this.displayName;
 
-        if (serverName) this.displayName = serverName;
-      },
-      error: (err) => {
-        const status = err?.status ?? 'unknown';
-        const detail = err?.error?.error || err?.message || 'No error body';
-        this.error = `API call failed (${status}) — ${detail}`;
-        console.error('API error', err);
-      }
-    });
+    this.apiResult = JSON.stringify(summary, null, 2);
   }
 
   logout(): void {
-    this.msal.instance.logoutRedirect({
-      postLogoutRedirectUri: window.location.origin
-    });
+    this.msal.instance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
   }
-}
-
-function ensureTrailingSlash(base: string): string {
-  return base.endsWith('/') ? base : `${base}/`;
 }

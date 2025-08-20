@@ -17,9 +17,14 @@ import { environment } from '../environments/environment';
         <button (click)="logout()">Logout</button>
       </header>
 
-      // <section>
-      //   <p>Welcome, {{ displayName }}!</p>
-      // </section>
+      <section>
+        <p>Welcome, {{ displayName }}!</p>
+
+        <h3>Account info from API (managed identity-backed)</h3>
+        <button (click)="getAccountInfo()">Get account info</button>
+        <pre *ngIf="apiResult">{{ apiResult | json }}</pre>
+        <p *ngIf="error" style="color:#b00020">{{ error }}</p>
+      </section>
     </div>
   `,
   styles: [`
@@ -52,12 +57,13 @@ export class DashboardComponent implements OnInit {
     this.displayName = account?.name || account?.username || 'User';
   }
 
-  callApi(): void {
+  getAccountInfo(): void {
     this.error = '';
     this.apiResult = undefined;
 
-    // Safe URL join: supports apiUrl with/without trailing slash
-    const url = new URL('/api/secret', ensureTrailingSlash(environment.apiUrl)).toString();
+    // Your API should expose something like GET /api/account that uses its Managed Identity
+    // to fetch/display principal info or downstream resource access.
+    const url = new URL('/api/account', ensureTrailingSlash(environment.apiUrl)).toString();
 
     this.http.get(url).subscribe({
       next: (r) => (this.apiResult = r),
@@ -69,59 +75,12 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void {
-    // Use MSAL logout (redirect back to app root)
     this.msal.instance.logoutRedirect({
       postLogoutRedirectUri: window.location.origin
     });
   }
 }
 
-/** Ensures a trailing slash on a base URL for URL() joining */
 function ensureTrailingSlash(base: string): string {
   return base.endsWith('/') ? base : `${base}/`;
 }
-
-// Old code
-// import { Component, inject } from '@angular/core';
-// import { CommonModule } from '@angular/common';
-// import { HttpClient } from '@angular/common/http';
-// import { environment } from '../environments/environment';
-// import { AuthService } from './services/auth.service';
-
-// @Component({
-//   selector: 'app-dashboard',
-//   standalone: true,
-//   imports: [CommonModule],
-//   template: `
-//     <div class="wrap">
-//       <header>
-//         <h2>Dashboard (Protected)</h2>
-//         <div class="spacer"></div>
-//         <button (click)="logout()">Logout</button>
-//       </header>
-
-//       <section>
-//         <p>Welcome, {{ auth.currentUser?.username }}!</p>
-//         <button (click)="callApi()">Call protected API</button>
-//         <pre *ngIf="apiResult">{{ apiResult | json }}</pre>
-//       </section>
-//     </div>
-//   `,
-//   styles: [`
-//     .wrap { max-width: 800px; margin: 4rem auto; }
-//     header { display: flex; align-items: center; gap: 12px; }
-//     .spacer { flex: 1 }
-//     button { padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd; background: #f7f7f7; cursor: pointer; }
-//     pre { background: #111; color: #eee; padding: 12px; border-radius: 8px; }
-//   `]
-// })
-// export class DashboardComponent {
-//   apiResult: any;
-//   auth = inject(AuthService);
-//   private http = inject(HttpClient);
-
-//   callApi() {
-//     this.http.get(`${environment.apiUrl}/api/secret`).subscribe(r => this.apiResult = r);
-//   }
-//   logout() { this.auth.logout(); }
-// }

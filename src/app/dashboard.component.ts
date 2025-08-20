@@ -20,8 +20,8 @@ import { environment } from '../environments/environment';
       <section>
         <p>Welcome, {{ displayName }}!</p>
 
-        <h3>Account info from API (managed identity-backed)</h3>
-        <button (click)="getAccountInfo()">Get account info</button>
+        <h3>Account info from API</h3>
+        <button (click)="apiTest()">API test</button>
         <pre *ngIf="apiResult">{{ apiResult | json }}</pre>
         <p *ngIf="error" style="color:#b00020">{{ error }}</p>
       </section>
@@ -45,39 +45,34 @@ export class DashboardComponent implements OnInit {
   error = '';
 
   ngOnInit(): void {
-    // Get the active account set during redirect handling
     let account = this.msal.instance.getActiveAccount();
     if (!account) {
-      // Fallback to the first cached account (e.g., on refresh)
       account = this.msal.instance.getAllAccounts()[0];
       if (account) this.msal.instance.setActiveAccount(account);
     }
-
-    // Prefer full name; fall back to username (email/UPN)
     this.displayName = account?.name || account?.username || 'User';
   }
 
-  getAccountInfo(): void {
+  apiTest(): void {
     this.error = '';
     this.apiResult = undefined;
 
-    // Your API should expose something like GET /api/account that uses its Managed Identity
-    // to fetch/display principal info or downstream resource access.
     const url = new URL('/api/account', ensureTrailingSlash(environment.apiUrl)).toString();
+    console.log('API test ->', url);
 
     this.http.get(url).subscribe({
       next: (r) => (this.apiResult = r),
       error: (err) => {
-        this.error = err?.error?.error ?? `API call failed (${err?.status || 'unknown'})`;
+        const status = err?.status ?? 'unknown';
+        const detail = err?.error?.error || err?.message || 'No error body';
+        this.error = `API call failed (${status}) — ${detail}`;
         console.error('API error', err);
       }
     });
   }
 
   logout(): void {
-    this.msal.instance.logoutRedirect({
-      postLogoutRedirectUri: window.location.origin
-    });
+    this.msal.instance.logoutRedirect({ postLogoutRedirectUri: window.location.origin });
   }
 }
 

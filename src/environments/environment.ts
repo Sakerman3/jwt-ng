@@ -2,7 +2,7 @@ export const environment = {
   production: false,
 
   // API running on your machine
-  apiUrl: 'http://localhost:4000',
+  apiUrl: 'https://jwt-app-gnfndrh8djcsg8bv.eastus-01.azurewebsites.net',
 
   // MSAL (Entra) — dev
   auth: {

@@ -12,7 +12,7 @@ import {
   MsalGuardConfiguration,
   MsalInterceptorConfiguration
 } from '@azure/msal-angular';
-import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
+import { PublicClientApplication, InteractionType, LogLevel } from '@azure/msal-browser';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { environment } from '../environments/environment';
 
@@ -20,13 +20,31 @@ export function MSALInstanceFactory() {
   return new PublicClientApplication({
     auth: {
       clientId: environment.auth.clientId,
-      authority: environment.auth.authority,
-      redirectUri: environment.auth.redirectUri,
-      postLogoutRedirectUri: environment.auth.postLogoutRedirectUri,
+      authority: environment.auth.authority, // e.g. https://login.microsoftonline.com/<TENANT_ID>
+      redirectUri: window.location.origin,    // dynamic is safest across envs
+      postLogoutRedirectUri: window.location.origin
     },
-    cache: { cacheLocation: 'localStorage' }
+    cache: { cacheLocation: 'localStorage' },
+    system: {
+      loggerOptions: {
+        logLevel: LogLevel.Verbose,
+        loggerCallback: (_level, message) => console.log('[MSAL]', message),
+      }
+    }
   });
 }
+
+// export function MSALInstanceFactory() {
+//   return new PublicClientApplication({
+//     auth: {
+//       clientId: environment.auth.clientId,
+//       authority: environment.auth.authority,
+//       redirectUri: environment.auth.redirectUri,
+//       postLogoutRedirectUri: environment.auth.postLogoutRedirectUri,
+//     },
+//     cache: { cacheLocation: 'localStorage' }
+//   });
+// }
 
 export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   const protectedResourceMap = new Map<string, Array<string>>([

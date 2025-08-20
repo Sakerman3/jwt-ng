@@ -25,13 +25,32 @@ import { environment } from '../environments/environment';
   `]
 })
 
+export class LoginComponent {
+  constructor(private msal: MsalService) {}
+
+  async signIn() {
+    try {
+      await this.msal.initialize(); // belt-and-suspenders
+      await this.msal.instance.loginRedirect({
+        scopes: [environment.auth.apiScope],
+        // remember where to come back to after sign-in
+        redirectStartPage: window.location.origin + '/'
+        // prompt: "select_account"  // uncomment to force account picker
+      });
+    } catch (e) {
+      console.error('loginRedirect failed', e);
+    }
+  }
+}
+
 // @Component({
 //   selector: 'app-login',
 //   template: `<button type="button" (click)="signIn()">Sign in with Microsoft</button>`
 // })
-export class LoginComponent {
-  constructor(private msal: MsalService) {}
-  signIn() {
-    this.msal.loginRedirect({ scopes: [environment.auth.apiScope] });
-  }
-}
+
+// export class LoginComponent {
+//   constructor(private msal: MsalService) {}
+//   signIn() {
+//     this.msal.loginRedirect({ scopes: [environment.auth.apiScope] });
+//   }
+// }

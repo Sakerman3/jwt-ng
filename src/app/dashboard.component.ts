@@ -16,6 +16,10 @@ import { environment } from '../environments/environment';
         <div class="spacer"></div>
         <button (click)="logout()">Logout</button>
       </header>
+
+      // <section>
+      //   <p>Welcome, {{ displayName }}!</p>
+      // </section>
     </div>
   `,
   styles: [`

@@ -18,7 +18,7 @@ import { MsalService } from '@azure/msal-angular';
       <section>
         <p>Welcome, {{ displayName }}!</p>
 
-        <h3>Account info (same source as name)</h3>
+        <h3>API Test - Account Info</h3>
         <button (click)="apiTest()">API test</button>
         <pre *ngIf="apiResult">{{ apiResult }}</pre>
         <p *ngIf="error" style="color:#b00020">{{ error }}</p>

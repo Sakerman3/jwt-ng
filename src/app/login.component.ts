@@ -16,8 +16,7 @@ import { environment } from '../environments/environment';
 
       <hr />
 
-      <h3>API test</h3>
-      <p>This test uses the same source as the name (MSAL account cache) — no HTTP call.</p>
+      <h3>API Test</h3>
       <button type="button" (click)="apiTest()">API test</button>
       <pre *ngIf="apiMessage">{{ apiMessage }}</pre>
     </div>
@@ -25,6 +24,7 @@ import { environment } from '../environments/environment';
   styles: [`
     .container { max-width: 360px; margin: 10vh auto; display: grid; gap: 12px; }
     h1 { font-size: 24px; font-weight: bold; text-align: center; }
+    h3 { font-size: 18px; font-weight: bold; text-align: center; }
     button { padding: 10px 12px; border-radius: 8px; border: none; cursor: pointer; }
     pre { background:#111;color:#eee;padding:12px;border-radius:8px;white-space:pre-wrap;word-break:break-word; }
   `]
